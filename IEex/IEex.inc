@@ -4,16 +4,19 @@
 ; IEex by Bubb: github.com/Bubb13/IEex 
 ;
 ;------------------------------------------------------------------------------
+
 include windows.inc
 
-include user32.inc
 include kernel32.inc
-include version.inc
-
-includelib user32.lib
 includelib kernel32.lib
+
+include user32.inc
+includelib user32.lib
+
+include version.inc
 includelib version.lib
 
+include \masm32\macros\macros.asm
 
 ;------------------------------------------------------------------------------
 ; IEex Prototypes

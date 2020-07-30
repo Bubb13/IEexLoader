@@ -343,6 +343,11 @@ IEexInitGlobals PROC USES EBX
     lea eax, luaL_loadstring
     mov F_LuaL_loadstring, eax
     
+    lea eax, l_log_print
+    mov F_l_log_print, eax
+    lea eax, SDL_Log
+    mov F_SDL_Log, eax
+    
 ;    ELSE ; USE LUA52.DLL
 ;    IFDEF DEBUG32
 ;    PrintText 'Using LUA52.DLL'

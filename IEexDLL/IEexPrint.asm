@@ -10,7 +10,7 @@
 ; IEexPrint Prototypes
 ;------------------------------------------------------------------------------
 IFDEF IEEX_SDLINT
-SDL_Log                 PROTO C lpszString:DWORD, lpszFmt:DWORD
+SDL_Log                 PROTO C lpszFmt:DWORD, argCount:DWORD, args:VARARG
 SDL_LogMessageV         PROTO C priority:DWORD, lpszFmt:DWORD, lpszString:DWORD
 SDL_LogOutput           PROTO C priority:DWORD, message:DWORD
 ENDIF
@@ -96,6 +96,7 @@ LABEL_0x00516D90:
     push edi
     call lua_tolstring
     push eax
+    push 1
     push CTEXT("%s")
     jmp LABEL_0x00516DBD
     
@@ -105,12 +106,13 @@ LABEL_0x00516DAF:
     call lua_typename
     push eax
     push esi
+    push 2
     push CTEXT("Unable to convert arg %d a %s to string")
     
 LABEL_0x00516DBD:
     call SDL_Log
     inc esi
-    add esp,14h
+    add esp,18h
     cmp esi,ebx
     jle LABEL_0x00516D90
     
@@ -131,14 +133,34 @@ IEEX_ALIGN
 ;------------------------------------------------------------------------------
 ; SDL_Log
 ;------------------------------------------------------------------------------
-SDL_Log PROC C lpszFmt:DWORD, lpszString:DWORD
+;SDL_Log PROC C lpszFmt:DWORD, argCount:DWORD, lpszString:DWORD
+;    IFDEF DEBUG32
+;    PrintText 'SDL_Log'
+;    ENDIF
+;    Invoke SDL_LogMessageV, SDL_LOG_PRIORITY_INFO, lpszFmt, lpszString
+;    ret
+;SDL_Log ENDP
+
+SDL_Log PROC C USES ESI EBX lpszFmt:DWORD, argCount:DWORD, args:VARARG
     IFDEF DEBUG32
     PrintText 'SDL_Log'
     ENDIF
-    Invoke SDL_LogMessageV, SDL_LOG_PRIORITY_INFO, lpszFmt, lpszString
+    mov esi,argCount
+    mov ebx,8
+    imul esi,esi,4
+    add ebx,esi
+    sub esi,4
+    .WHILE (sdword ptr esi >= 0)
+        push args[esi]
+        sub esi,4
+    .ENDW
+    push lpszFmt
+    push offset szLogMessageBuffer
+    call wsprintf
+    add esp,ebx
+    Invoke SDL_LogOutput, 3, Addr szLogMessageBuffer
     ret
 SDL_Log ENDP
-
 
 IEEX_ALIGN
 ;------------------------------------------------------------------------------

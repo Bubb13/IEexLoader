@@ -248,6 +248,11 @@ Lua_typenamePtr         TYPEDEF PTR Lua_typenameProto
 LuaL_loadstringProto    TYPEDEF PROTO C :VARARG ;luastate:DWORD, ptr_string:DWORD
 LuaL_loadstringPtr      TYPEDEF PTR LuaL_loadstringProto
 
+l_log_printProto        TYPEDEF PROTO C :VARARG
+l_log_printPtr          TYPEDEF PTR l_log_printProto
+SDL_LogProto            TYPEDEF PROTO C :VARARG
+SDL_LogPtr              TYPEDEF PTR SDL_LogProto
+
 ftol2_sseProto          TYPEDEF PROTO C :VARARG
 ftol2_ssePtr            TYPEDEF PTR ftol2_sseProto
 MallocProto             TYPEDEF PROTO C :VARARG
@@ -283,6 +288,9 @@ F_Lua_touserdata        Lua_touserdataPtr 0
 F_Lua_type              Lua_typePtr 0
 F_Lua_typename          Lua_typenamePtr 0
 F_LuaL_loadstring       LuaL_loadstringPtr 0
+
+F_l_log_print           l_log_printPtr 0
+F_SDL_Log               SDL_LogPtr 0
 
 F__ftol2_sse            ftol2_ssePtr 0
 F_Malloc                MallocPtr 0

@@ -9,7 +9,7 @@
 .XMM
 .model flat,stdcall
 option casemap:none
-include \masm32\macros\macros.asm
+
 ;
 ;DEBUG32 EQU 1
 ;IFDEF DEBUG32
@@ -19,7 +19,6 @@ include \masm32\macros\macros.asm
 ;    DEBUGEXE textequ <'M:\Masm32\DbgWin.exe'>
 ;    include M:\Masm32\include\debug32.inc
 ;ENDIF
-
 
 
 include IEex.inc
@@ -124,8 +123,8 @@ WinMain PROC USES EBX hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdSh
     ; BG1
     Invoke FindFirstFile, Addr szBioware_BG, Addr wfd
     .IF eax != INVALID_HANDLE_VALUE
-        lea eax, wfd.cFileName
-        Invoke lstrcpy, Addr szIEGameEXE, eax
+        ;lea eax, wfd.cFileName
+        ;Invoke lstrcpy, Addr szIEGameEXE, eax
         Invoke FindClose, eax
 ;        IFDEF CHECK_EXE_FILEVERSION
 ;        Invoke CheckFileVersion, Addr szBioware_BG, Addr szBioware_BGExeVersion ; "2, 5, 0, 0" - dont have this exe to check file version
@@ -153,8 +152,8 @@ WinMain PROC USES EBX hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdSh
     .IF bIEGameFound == FALSE
         Invoke FindFirstFile, Addr szBioware_BG2, Addr wfd
         .IF eax != INVALID_HANDLE_VALUE
-            lea eax, wfd.cFileName
-            Invoke lstrcpy, Addr szIEGameEXE, eax
+            ;lea eax, wfd.cFileName
+            ;Invoke lstrcpy, Addr szIEGameEXE, eax
             Invoke FindClose, eax
             IFDEF CHECK_EXE_FILEVERSION
             Invoke CheckFileVersion, Addr szBioware_BG2, Addr szBioware_BG2ExeVersion ; "2, 5, 0, 0"
@@ -183,8 +182,8 @@ WinMain PROC USES EBX hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdSh
     .IF bIEGameFound == FALSE
         Invoke FindFirstFile, Addr szBlackIsle_IWD, Addr wfd
         .IF eax != INVALID_HANDLE_VALUE
-            lea eax, wfd.cFileName
-            Invoke lstrcpy, Addr szIEGameEXE, eax
+            ;lea eax, wfd.cFileName
+            ;Invoke lstrcpy, Addr szIEGameEXE, eax
             Invoke FindClose, eax
             IFDEF CHECK_EXE_FILEVERSION
             Invoke CheckFileVersion, Addr szBlackIsle_IWD, Addr szBlackIsle_IWDExeVersion ; "1, 4, 2, 0"
@@ -213,8 +212,8 @@ WinMain PROC USES EBX hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdSh
     .IF bIEGameFound == FALSE
         Invoke FindFirstFile, Addr szBlackIsle_IWD2, Addr wfd
         .IF eax != INVALID_HANDLE_VALUE
-            lea eax, wfd.cFileName
-            Invoke lstrcpy, Addr szIEGameEXE, eax
+            ;lea eax, wfd.cFileName
+            ;Invoke lstrcpy, Addr szIEGameEXE, eax
             Invoke FindClose, eax
             IFDEF CHECK_EXE_FILEVERSION
             Invoke CheckFileVersion, Addr szBlackIsle_IWD2, Addr szBlackIsle_IWD2ExeVersion ; "2, 0, 1, 0"
@@ -243,8 +242,8 @@ WinMain PROC USES EBX hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdSh
     .IF bIEGameFound == FALSE
         Invoke FindFirstFile, Addr szBlackIsle_PST, Addr wfd
         .IF eax != INVALID_HANDLE_VALUE
-            lea eax, wfd.cFileName
-            Invoke lstrcpy, Addr szIEGameEXE, eax
+            ;lea eax, wfd.cFileName
+            ;Invoke lstrcpy, Addr szIEGameEXE, eax
             Invoke FindClose, eax
             IFDEF CHECK_EXE_FILEVERSION
             Invoke CheckFileVersion, Addr szBlackIsle_PST, Addr szBlackIsle_PSTExeVersion ; "1, 0, 0, 1"
