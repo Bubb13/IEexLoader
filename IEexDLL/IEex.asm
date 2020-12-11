@@ -300,12 +300,10 @@ IEexInitGlobals PROC USES EBX
     lea eax, lua_createtable
     mov F_Lua_createtable, eax
     mov F_Lua_createtablex, eax
-    lea eax, lua_getglobal
-    mov F_Lua_getglobal, eax
     lea eax, lua_gettop
     mov F_Lua_gettop, eax
-    lea eax, lua_pcallk
-    mov F_Lua_pcallk, eax
+    lea eax, lua_pcall
+    mov F_Lua_pcall, eax
     lea eax, lua_pushcclosure
     mov F_Lua_pushcclosure, eax
     lea eax, lua_pushlightuserdata
@@ -318,12 +316,12 @@ IEexInitGlobals PROC USES EBX
     mov F_Lua_pushstring, eax
     lea eax, lua_rawgeti
     mov F_Lua_rawgeti, eax
-    lea eax, lua_rawlen
-    mov F_Lua_rawlen, eax
+    lea eax, lua_objlen
+    mov F_Lua_objlen, eax
+    lea eax, lua_getfield
+    mov F_Lua_getfield, eax
     lea eax, lua_setfield
     mov F_Lua_setfield, eax
-    lea eax, lua_setglobal
-    mov F_Lua_setglobal, eax
     lea eax, lua_settable
     mov F_Lua_settable, eax
     lea eax, lua_settop
@@ -332,8 +330,8 @@ IEexInitGlobals PROC USES EBX
     mov F_Lua_toboolean, eax
     lea eax, lua_tolstring
     mov F_Lua_tolstring, eax
-    lea eax, lua_tonumberx
-    mov F_Lua_tonumberx, eax
+    lea eax, lua_tonumber
+    mov F_Lua_tonumber, eax
     lea eax, lua_touserdata
     mov F_Lua_touserdata, eax
     lea eax, lua_type
@@ -381,12 +379,10 @@ IEexInitGlobals PROC USES EBX
 ;    Invoke GetProcAddress, hLua, Addr szLua_createtable
 ;    mov F_Lua_createtable, eax
 ;    mov F_Lua_createtablex, eax
-;    Invoke GetProcAddress, hLua, Addr szLua_getglobal
-;    mov F_Lua_getglobal, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_gettop
 ;    mov F_Lua_gettop, eax
-;    Invoke GetProcAddress, hLua, Addr szLua_pcallk
-;    mov F_Lua_pcallk, eax
+;    Invoke GetProcAddress, hLua, Addr szLua_pcall
+;    mov F_Lua_pcall, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_pushcclosure
 ;    mov F_Lua_pushcclosure, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_pushlightuserdata
@@ -399,12 +395,12 @@ IEexInitGlobals PROC USES EBX
 ;    mov F_Lua_pushstring, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_rawgeti
 ;    mov F_Lua_rawgeti, eax
-;    Invoke GetProcAddress, hLua, Addr szLua_rawlen
-;    mov F_Lua_rawlen, eax
+;    Invoke GetProcAddress, hLua, Addr szLua_objlen
+;    mov F_Lua_objlen, eax
+;    Invoke GetProcAddress, hLua, Addr szLua_getfield
+;    mov F_Lua_getfield, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_setfield
 ;    mov F_Lua_setfield, eax
-;    Invoke GetProcAddress, hLua, Addr szLua_setglobal
-;    mov F_Lua_setglobal, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_settable
 ;    mov F_Lua_settable, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_settop
@@ -413,8 +409,8 @@ IEexInitGlobals PROC USES EBX
 ;    mov F_Lua_toboolean, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_tolstring
 ;    mov F_Lua_tolstring, eax
-;    Invoke GetProcAddress, hLua, Addr szLua_tonumberx
-;    mov F_Lua_tonumberx, eax
+;    Invoke GetProcAddress, hLua, Addr szLua_tonumber
+;    mov F_Lua_tonumber, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_touserdata
 ;    mov F_Lua_touserdata, eax
 ;    Invoke GetProcAddress, hLua, Addr szLua_type

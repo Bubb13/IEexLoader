@@ -138,7 +138,7 @@ IEexLuaInit PROC lpszLuaFile:DWORD
     .ENDIF    
     ENDIF
     
-    Invoke lua_pcallk, g_lua, 0, LUA_MULTRET, 0, 0, 0
+    Invoke lua_pcall, g_lua, 0, LUA_MULTRET, 0
     .IF eax != LUA_OK
         IFDEF IEEX_LOGGING
         .IF gIEexLog >= LOGLEVEL_DEBUG
@@ -146,7 +146,7 @@ IEexLuaInit PROC lpszLuaFile:DWORD
         .ENDIF    
         ENDIF
         IFDEF DEBUG32
-        PrintText 'F_Lua_pcallk error'
+        PrintText 'F_Lua_pcall error'
         ENDIF
         .IF eax == LUA_ERRRUN ; a runtime error
         
@@ -175,35 +175,9 @@ IEexLuaBootstrap PROC
     Invoke luaL_newstate
     mov g_lua, eax
     
-    Invoke luaL_requiref, g_lua, CTEXT("_G"), Addr luaopen_base, 1
-    Invoke lua_settop, g_lua, -2
-    
+    Invoke luaL_openlibs, g_lua
     Invoke lua_pushcclosure, g_lua, Addr l_log_print, 0
-    Invoke lua_setglobal, g_lua, CTEXT("print")
-    
-    Invoke luaL_requiref, g_lua, CTEXT("table"), Addr luaopen_table, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("string"), Addr luaopen_string, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("bit32"), Addr luaopen_bit32, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("math"), Addr luaopen_math, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("debug"), Addr luaopen_debug, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("io"), Addr luaopen_io, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("os"), Addr luaopen_os, 1
-    Invoke lua_settop, g_lua, -2
-    
-    Invoke luaL_requiref, g_lua, CTEXT("package"), Addr luaopen_package, 1
-    Invoke lua_settop, g_lua, -2
+    Invoke lua_setfield, g_lua, LUA_GLOBALSINDEX, CTEXT("print")
 
     ret
 IEexLuaBootstrap ENDP
@@ -216,7 +190,7 @@ IEEX_ALIGN
 ;------------------------------------------------------------------------------
 IEexLuaRegisterFunction PROC lpFunctionAddress:DWORD, lpszFunctionName:DWORD
     Invoke lua_pushcclosure, g_lua, lpFunctionAddress, 0
-    Invoke lua_setglobal, g_lua, lpszFunctionName
+    Invoke lua_setfield, g_lua, LUA_GLOBALSINDEX, lpszFunctionName
     ret
 IEexLuaRegisterFunction ENDP
 
@@ -356,18 +330,16 @@ IEex_WriteByte PROC C arg:VARARG
     .ENDIF
     ENDIF
     ENDIF
-    push 0h
     push 1h
     push dword ptr [ebp+8h]
-    call lua_tonumberx
-    add esp, 0Ch
+    call lua_tonumber
+    add esp, 08h
     call F__ftol2_sse
     mov edi, eax
-    push 0h
     push 2h
     push dword ptr [ebp+8h]
-    call lua_tonumberx
-    add esp, 0Ch
+    call lua_tonumber
+    add esp, 08h
     call F__ftol2_sse
     mov byte ptr [edi], al
     mov eax, 0h
@@ -401,11 +373,10 @@ IEex_ExposeToLua PROC C arg:VARARG
     .ENDIF
     ENDIF
     ENDIF    
-    push 0h
     push 1h
     push dword ptr [ebp+8h]
-    call lua_tonumberx
-    add esp, 0Ch
+    call lua_tonumber
+    add esp, 08h
     call F__ftol2_sse
     push 0h
     push eax
@@ -418,9 +389,10 @@ IEex_ExposeToLua PROC C arg:VARARG
     call lua_tolstring
     add esp, 0Ch
     push eax
+    push LUA_GLOBALSINDEX
     push dword ptr [g_lua]
-    call lua_setglobal
-    add esp, 8h
+    call lua_setfield
+    add esp, 0Ch
     mov eax, 0h
     pop ebp
     ret 
@@ -442,7 +414,7 @@ IEex_Call PROC C arg:VARARG
     mov ebp, esp
 	push 2h
 	push dword ptr [ebp+8h]
-	call lua_rawlen
+	call lua_objlen
 	add esp, 8h
 	test eax, eax
 	je no_args
@@ -454,11 +426,10 @@ arg_loop:
 	push dword ptr [ebp+8h]
 	call lua_rawgeti
 	add esp, 0Ch
-	push 0h
 	push 0FFh
 	push dword ptr [ebp+8h]
-	call lua_tonumberx
-	add esp, 0Ch
+	call lua_tonumber
+	add esp, 08h
 	call F__ftol2_sse
 	push eax
 	push 0FEh
@@ -469,18 +440,16 @@ arg_loop:
 	cmp esi, edi
 	jle arg_loop
 no_args:
-	push 0h
 	push 3h
 	push dword ptr [ebp+8h]
-	call lua_tonumberx
-	add esp, 0Ch
+	call lua_tonumber
+	add esp, 08h
 	call F__ftol2_sse
 	push eax
-	push 0h
 	push 1h
 	push dword ptr [ebp+8h]
-	call lua_tonumberx
-	add esp, 0Ch
+	call lua_tonumber
+	add esp, 08h
 	call F__ftol2_sse
 	pop ecx
 	call eax
@@ -490,12 +459,11 @@ no_args:
 	fstp qword ptr [esp]
 	push dword ptr [ebp+8h]
 	call lua_pushnumber
-	add esp, 0Ch
-	push 0h
+	add esp, 08h
 	push 4h
 	push dword ptr [ebp+8h]
-	call lua_tonumberx
-	add esp, 0Ch
+	call lua_tonumber
+	add esp, 08h
 	call F__ftol2_sse
 	add esp, eax
 	mov eax, 1;#01
@@ -579,20 +547,14 @@ IEex_AddressList PROC C USES EBX lua_State:DWORD
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
 
-    Invoke lua_pushstring, lua_State, CTEXT("_lua_getglobal") 
-    fild F_Lua_getglobal
-    fstp qword ptr [qwAddress]
-    Invoke lua_pushnumber, lua_State, qwAddress
-    Invoke lua_settable, lua_State, -3
-
     Invoke lua_pushstring, lua_State, CTEXT("_lua_gettop") 
     fild F_Lua_gettop
     fstp qword ptr [qwAddress]
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
 
-    Invoke lua_pushstring, lua_State, CTEXT("_lua_pcallk") 
-    fild F_Lua_pcallk
+    Invoke lua_pushstring, lua_State, CTEXT("_lua_pcall") 
+    fild F_Lua_pcall
     fstp qword ptr [qwAddress]
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
@@ -633,20 +595,20 @@ IEex_AddressList PROC C USES EBX lua_State:DWORD
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
 
-    Invoke lua_pushstring, lua_State, CTEXT("_lua_rawlen") 
-    fild F_Lua_rawlen
+    Invoke lua_pushstring, lua_State, CTEXT("_lua_objlen") 
+    fild F_Lua_objlen
+    fstp qword ptr [qwAddress]
+    Invoke lua_pushnumber, lua_State, qwAddress
+    Invoke lua_settable, lua_State, -3
+
+    Invoke lua_pushstring, lua_State, CTEXT("_lua_getfield") 
+    fild F_Lua_getfield
     fstp qword ptr [qwAddress]
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
 
     Invoke lua_pushstring, lua_State, CTEXT("_lua_setfield") 
     fild F_Lua_setfield
-    fstp qword ptr [qwAddress]
-    Invoke lua_pushnumber, lua_State, qwAddress
-    Invoke lua_settable, lua_State, -3
-
-    Invoke lua_pushstring, lua_State, CTEXT("_lua_setglobal") 
-    fild F_Lua_setglobal
     fstp qword ptr [qwAddress]
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
@@ -675,8 +637,8 @@ IEex_AddressList PROC C USES EBX lua_State:DWORD
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3
 
-    Invoke lua_pushstring, lua_State, CTEXT("_lua_tonumberx") 
-    fild F_Lua_tonumberx
+    Invoke lua_pushstring, lua_State, CTEXT("_lua_tonumber") 
+    fild F_Lua_tonumber
     fstp qword ptr [qwAddress]
     Invoke lua_pushnumber, lua_State, qwAddress
     Invoke lua_settable, lua_State, -3

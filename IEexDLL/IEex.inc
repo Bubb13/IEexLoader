@@ -22,8 +22,8 @@ IFDEF IEEX_LUALIB
     includelib msvcrt12.lib
     ECHO Using LUA Static Library
 ELSE
-    include lua52.inc
-    includelib lua52dll.lib
+    include lua51.inc
+    includelib lua51dll.lib
     ECHO Using LUA Dynamic Link Library
 ENDIF
 IFDEF IEEX_SDLDLL
@@ -92,6 +92,8 @@ LUA_ERRFILE             EQU (LUA_ERRERR+1)
 
 LUA_MULTRET	            EQU (-1)
 
+LUA_GLOBALSINDEX        EQU (-10002)
+
 ; IEexLogInformation dwType:
 INFO_ALL                EQU 0
 INFO_GAME               EQU 1
@@ -132,7 +134,7 @@ szM__IEexlua            DB "M__IEex.lua",0
 szErrorGetModuleInfo    DB "GetModuleInformation Failed",0
 szErrorImageDosSig      DB "IMAGE_DOS_SIGNATURE Failed",0
 szErrorImageNtSig       DB "IMAGE_NT_SIGNATURE Failed",0
-szErrorLuaDll           DB "Cannot load or find lua52.dll - aborting.",0
+szErrorLuaDll           DB "Cannot load or find lua51.dll - aborting.",0
 
 ;---------------------------
 ; Version Info
@@ -161,29 +163,28 @@ F_LoadLibrary           DD 0 ;
 g_lua                   DD 0 ; actual content of global lua variable
 
 IFNDEF IEEX_LUALIB
-szLuaDLL                DB "lua52.dll",0
+szLuaDLL                DB "lua51.dll",0
 szLuaL_newstate         DB "luaL_newstate",0
 szLuaL_openlibs         DB "luaL_openlibs",0
 szLuaL_loadfilex        DB "luaL_loadfilex",0
 szLua_createtable       DB "lua_createtable",0
 szLua_createtablex      DB "lua_createtablex",0
-szLua_getglobal         DB "lua_getglobal",0
 szLua_gettop            DB "lua_gettop",0
-szLua_pcallk            DB "lua_pcallk",0
+szLua_pcall            DB "lua_pcall",0
 szLua_pushcclosure      DB "lua_pushcclosure",0
 szLua_pushlightuserdata DB "lua_pushlightuserdata",0
 szLua_pushlstring       DB "lua_pushlstring",0
 szLua_pushnumber        DB "lua_pushnumber",0
 szLua_pushstring        DB "lua_pushstring",0
 szLua_rawgeti           DB "lua_rawgeti",0
-szLua_rawlen            DB "lua_rawlen",0
+szLua_objlen            DB "lua_objlen",0
+szLua_getfield          DB "lua_getfield",0
 szLua_setfield          DB "lua_setfield",0
-szLua_setglobal         DB "lua_setglobal",0
 szLua_settable          DB "lua_settable",0
 szLua_settop            DB "lua_settop",0
 szLua_toboolean         DB "lua_toboolean",0
 szLua_tolstring         DB "lua_tolstring",0
-szLua_tonumberx         DB "lua_tonumberx",0
+szLua_tonumber         DB "lua_tonumber",0
 szLua_touserdata        DB "lua_touserdata",0
 szLua_type              DB "lua_type",0
 szLua_typename          DB "lua_typename",0
@@ -205,12 +206,10 @@ Lua_createtableProto    TYPEDEF PROTO C :VARARG ;luastate:DWORD, narr:DWORD, nre
 Lua_createtablePtr      TYPEDEF PTR Lua_createtableProto
 Lua_createtablexProto   TYPEDEF PROTO C :VARARG ;luastate:DWORD ; override for no narr and nrec params of lua_createtable
 Lua_createtablexPtr     TYPEDEF PTR Lua_createtablexProto
-Lua_getglobalProto      TYPEDEF PROTO C luastate:DWORD, ptr_name:DWORD
-Lua_getglobalPtr        TYPEDEF PTR Lua_getglobalProto
 Lua_gettopProto         TYPEDEF PROTO C luastate:DWORD
 Lua_gettopPtr           TYPEDEF PTR Lua_gettopProto
-Lua_pcallkProto         TYPEDEF PROTO C luastate:DWORD, nargs:DWORD, nresults:DWORD, msgh:DWORD, lua_KContext_ctx:DWORD, lua_KFunction_k:DWORD
-Lua_pcallkPtr           TYPEDEF PTR Lua_pcallkProto
+Lua_pcallProto         TYPEDEF PROTO C luastate:DWORD, nargs:DWORD, nresults:DWORD, msgh:DWORD, lua_KContext_ctx:DWORD, lua_KFunction_k:DWORD
+Lua_pcallPtr           TYPEDEF PTR Lua_pcallProto
 Lua_pushcclosureProto   TYPEDEF PROTO C :VARARG ;luastate:DWORD, lua_CFunction:DWORD, n:DWORD
 Lua_pushcclosurePtr     TYPEDEF PTR Lua_pushcclosureProto
 Lua_pushlightuserdataProto TYPEDEF PROTO C luastate:DWORD, p:DWORD
@@ -223,12 +222,12 @@ Lua_pushstringProto     TYPEDEF PROTO C :VARARG ;luastate:DWORD, ptr_string:DWOR
 Lua_pushstringPtr       TYPEDEF PTR Lua_pushstringProto
 Lua_rawgetiProto        TYPEDEF PROTO C luastate:DWORD, index:DWORD, n:DWORD
 Lua_rawgetiPtr          TYPEDEF PTR Lua_rawgetiProto
-Lua_rawlenProto         TYPEDEF PROTO C luastate:DWORD, index:DWORD
-Lua_rawlenPtr           TYPEDEF PTR Lua_rawlenProto
+Lua_objlenProto         TYPEDEF PROTO C luastate:DWORD, index:DWORD
+Lua_objlenPtr           TYPEDEF PTR Lua_objlenProto
+Lua_getfieldProto       TYPEDEF PROTO C luastate:DWORD, index:DWORD, ptr_string:DWORD
+Lua_getfieldPtr         TYPEDEF PTR Lua_getfieldProto
 Lua_setfieldProto       TYPEDEF PROTO C luastate:DWORD, index:DWORD, ptr_string:DWORD
 Lua_setfieldPtr         TYPEDEF PTR Lua_setfieldProto
-Lua_setglobalProto      TYPEDEF PROTO C :VARARG ;luastate:DWORD, ptr_name:DWORD
-Lua_setglobalPtr        TYPEDEF PTR Lua_setglobalProto
 Lua_settableProto       TYPEDEF PROTO C :VARARG ;luastate:DWORD, index:DWORD
 Lua_settablePtr         TYPEDEF PTR Lua_settableProto
 Lua_settopProto         TYPEDEF PROTO C luastate:DWORD, index:DWORD
@@ -237,8 +236,8 @@ Lua_tobooleanProto      TYPEDEF PROTO C luastate:DWORD, index:DWORD
 Lua_tobooleanPtr        TYPEDEF PTR Lua_tobooleanProto
 Lua_tolstringProto      TYPEDEF PROTO C luastate:DWORD, index:DWORD, ptr_len:DWORD
 Lua_tolstringPtr        TYPEDEF PTR Lua_tolstringProto
-Lua_tonumberxProto      TYPEDEF PROTO C luastate:DWORD, index:DWORD, ptr_isnum:DWORD
-Lua_tonumberxPtr        TYPEDEF PTR Lua_tonumberxProto
+Lua_tonumberProto      TYPEDEF PROTO C luastate:DWORD, index:DWORD, ptr_isnum:DWORD
+Lua_tonumberPtr        TYPEDEF PTR Lua_tonumberProto
 Lua_touserdataProto     TYPEDEF PROTO C luastate:DWORD, index:DWORD
 Lua_touserdataPtr       TYPEDEF PTR Lua_touserdataProto
 Lua_typeProto           TYPEDEF PROTO C luastate:DWORD, index:DWORD
@@ -261,29 +260,29 @@ FreeProto               TYPEDEF PROTO C :VARARG
 FreePtr                 TYPEDEF PTR FreeProto
 
 
+
 ; Lua function pointers
 F_LuaL_newstate         LuaL_newstatePtr 0
 F_LuaL_openlibs         LuaL_openlibsPtr 0
 F_LuaL_loadfilex        LuaL_loadfilexPtr 0
 F_Lua_createtable       Lua_createtablePtr 0
 F_Lua_createtablex      Lua_createtablexPtr 0 ; override for no params of lua_createtable
-F_Lua_getglobal         Lua_getglobalPtr 0
 F_Lua_gettop            Lua_gettopPtr 0
-F_Lua_pcallk            Lua_pcallkPtr 0
+F_Lua_pcall            Lua_pcallPtr 0
 F_Lua_pushcclosure      Lua_pushcclosurePtr 0
 F_Lua_pushlightuserdata Lua_pushlightuserdataPtr 0
 F_Lua_pushlstring       Lua_pushlstringPtr 0
 F_Lua_pushnumber        Lua_pushnumberPtr 0
 F_Lua_pushstring        Lua_pushstringPtr 0
 F_Lua_rawgeti           Lua_rawgetiPtr 0
-F_Lua_rawlen            Lua_rawlenPtr 0
+F_Lua_objlen            Lua_objlenPtr 0
+F_Lua_getfield          Lua_getfieldPtr 0
 F_Lua_setfield          Lua_setfieldPtr 0
-F_Lua_setglobal         Lua_setglobalPtr 0
 F_Lua_settable          Lua_settablePtr 0
 F_Lua_settop            Lua_settopPtr 0
 F_Lua_toboolean         Lua_tobooleanPtr 0
 F_Lua_tolstring         Lua_tolstringPtr 0
-F_Lua_tonumberx         Lua_tonumberxPtr 0
+F_Lua_tonumber         Lua_tonumberPtr 0
 F_Lua_touserdata        Lua_touserdataPtr 0
 F_Lua_type              Lua_typePtr 0
 F_Lua_typename          Lua_typenamePtr 0
@@ -295,6 +294,7 @@ F_SDL_Log               SDL_LogPtr 0
 F__ftol2_sse            ftol2_ssePtr 0
 F_Malloc                MallocPtr 0
 F_Free                  FreePtr 0
+
 
 
 
